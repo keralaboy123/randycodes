@@ -59,8 +59,8 @@ class DragSelectTreeView(ttk.Treeview):
            item = self.identify('item', event.x, event.y)
            if not item in self.items:
               self.items.append(item)
-              self.show_multiple_selection()
               
+        self.show_multiple_selection()
         self._motion(event)
 
     def end_selection(self, event):
