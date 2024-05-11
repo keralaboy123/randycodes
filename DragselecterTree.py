@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 """
-this costumized treeview widget provide drag selection of multiple items
+this custumized treeview widget provide drag selection of multiple items
 it is achieved by capturing motion event with mouse scroll event
 this is a treeview with all of its properties so 
 you can use classs DragSelectTreeView instead treeview of tk
