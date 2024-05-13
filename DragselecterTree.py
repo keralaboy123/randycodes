@@ -86,9 +86,11 @@ class scrollselection(DragSelectTreeView):
         super().__init__(root,**kw)
         self.bind("<B1-Motion>",self.generate_scrollingevent)
         super().unbind("<MouseWheel>")
+        
     def generate_scrollingevent(self,event):
         "this is for an experiment"
         self.event_generate("<MouseWheel>", delta=-120, x=50, y=50)
+
 
 if __name__ == "__main__":
 
