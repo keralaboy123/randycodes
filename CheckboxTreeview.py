@@ -10,25 +10,12 @@ IM_CHECKED = os.path.join("", "checked.png")
 IM_UNCHECKED = os.path.join("","unchecked.png")
 
 class CheckboxTreeview(DragselecterTree.scrollselection):
-    """
-    :class:`ttk.Treeview` widget with checkboxes left of each item.
-
-    .. note::
-        The checkboxes are done via the image attribute of the item,
-        so to keep the checkbox, you cannot add an image to the item.
-    """
 
     def __init__(self, master=None, **kw):
-        """
-        Create a CheckboxTreeview.
 
-        :param master: master widget
-        :type master: widget
-        :param kw: options to be passed on to the :class:`ttk.Treeview` initializer
-        """
         super().__init__( master, **kw, style="a.Treeview",columns=("other_column",))
-        
-        # checkboxes are implemented with pictures
+
+
         self.im_checked = ImageTk.PhotoImage(Image.open(IM_CHECKED), master=self)
         self.im_unchecked = ImageTk.PhotoImage(Image.open(IM_UNCHECKED), master=self)
 
@@ -259,10 +246,10 @@ class CheckboxTreeview(DragselecterTree.scrollselection):
                 self._uncheck_ancestor(item)
 
 class dragselectcheckbox (CheckboxTreeview):
-    "when draging and selecting multipleit will add tickmarks to checkbox automaticaly"
-    def show_multiple_selection (self):
+    "when draging and selecting multiple items then it will add tickmarks to checkbox automaticaly"
+    def update_selection (self,event):
         "parent class has autoselect option when draging so reusing it here"
-        super().show_multiple_selection ()
+        super().update_selection (event)
         for item in self.selection ():
             self.change_state (item, "checked")
 
@@ -284,6 +271,6 @@ if __name__ == "__main__":
    for x in range(100000):
        tree.insert("", "end", text="heloo "+str(x))
 
-   tree.bind("<ButtonRelease-2>",lambda x:tree.unckeck_all_but_not_selection())
+   tree.bind("<ButtonRelease-2>",lambda x:tree.uncheck_all_plus_selection())
 
    root.mainloop()
