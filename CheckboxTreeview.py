@@ -3,13 +3,12 @@ import tkinter as tk
 import DragselecterTree
 import os
 from PIL import Image, ImageTk
-## this is borrowed from ttkwidgets and modified for my dragseletiontreeview
+
 
 IM_CHECKED = os.path.join("", "checked.png")  # These three checkbox icons were isolated from
 IM_UNCHECKED = os.path.join("",
                             "unchecked.png")  # Checkbox States.svg (https://commons.wikimedia.org/wiki/File:Checkbox_States.svg?uselang=en)
-IM_TRISTATE = os.path.join("",
-                           "unchecked.png")  # by Marekich [CC BY-SA 3.0  (https://creativecommons.org/licenses/by-sa/3.0)]
+
 
 
 class CheckboxTreeview(DragselecterTree.DragSelectTreeView):
@@ -186,7 +185,7 @@ class CheckboxTreeview(DragselecterTree.DragSelectTreeView):
         elif not ("unchecked" in kw["tags"] or "checked" in kw["tags"]) :
             kw["tags"] += (tag,)
 
-        return super().insert( parent, index, iid, **kw)
+        return DragselecterTree.DragSelectTreeView.insert(self, parent, index, iid, **kw)
 
     def get_checked(self):
         """Return the list of checked items that do not have any child."""
@@ -278,19 +277,22 @@ class CheckboxTreeview(DragselecterTree.DragSelectTreeView):
                 self._uncheck_descendant(item)
                 self._uncheck_ancestor(item)
 
+class dragselectcheckbox (CheckboxTreeview):
+    "when draging and selecting multipleit will add tickmarks to checkbox automaticaly"
+    def show_multiple_selection (self):
+        super().show_multiple_selection ()
+        for item in self.selection ():
+            self.change_state (item, "checked")
 
+if __name__ == "__main__":
+   root = tk.Tk()
 
-root = tk.Tk()
+   tree = dragselectcheckbox(root)
+   tree.pack()
 
-tree = CheckboxTreeview(root)
-tree.pack()
+   for x in range(100000):
+       tree.insert("", "end", text="heloo "+str(x))
 
-for x in range(100000):
-   tree.insert("", "end", text="heloo "+str(x))
-tree.insert("", "end", text="11")
-tree.insert("", "end",  text="12")
-tree.insert("", "end",  text="111")
-tree.insert("", "end",  text="2")
-tree.bind("<ButtonRelease-2>",lambda x:tree.check_all())
+   tree.bind("<ButtonRelease-2>",lambda x:tree.uncheck_all())
 
-root.mainloop()
+   root.mainloop()
