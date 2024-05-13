@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 """
-this custumized treeview widget provide drag selection of multiple items
+this costumized treeview widget provide drag selection of multiple items
 it is achieved by capturing motion event with mouse scroll event
 this is a treeview with all of its properties so 
 you can use classs DragSelectTreeView instead treeview of tk
@@ -33,9 +33,10 @@ class DragSelectTreeView(ttk.Treeview):
         pass
 
     def _motion(self, event):
+
         pass
 
-    def bind(self, event_string, function):
+    def bind(self, event_string, function,val=None, **kw):
         if event_string == "<Button-1>":
             self._press = function
         elif event_string == "<B1-Motion>":
@@ -48,49 +49,62 @@ class DragSelectTreeView(ttk.Treeview):
             super().bind(event_string, function)
 
     def getselection_list(self):
-        return self.items
+        return self.selection()
+
+    def unselect_allitems(self):
+        self.selection_set([])
 
     def start_selection(self, event):
-        self.items = []
+        self.selection_set([])
         self.keyholdding = True
         item = self.identify('item', event.x, event.y)
-        self.items.append(item)
+        self.selection_add(item)
         self._press(event)
 
-    def show_multiple_selection(self):
-        self.selection_set(self.items)
-
     def update_selection(self, event):
+
         if self.keyholdding:
 
             item = self.identify('item', event.x, event.y)
-            if not item in self.items:
-                self.items.append(item)
+            if not item in self.selection():
+                self.selection_add(item)
 
-        self.show_multiple_selection()
         self._motion(event)
+
 
     def end_selection(self, event):
         self.keyholdding = False
         self._release(event)
 
 
+
+class scrollselection(DragSelectTreeView):
+    """automatic scrolling of treeview when selected and dragged
+     treeview items will scroll and a selection will appear over the items
+    """
+    def __init__(self,root,**kw):
+        super().__init__(root,**kw)
+        self.bind("<B1-Motion>",self.generate_scrollingevent)
+        super().unbind("<MouseWheel>")
+    def generate_scrollingevent(self,event):
+        "this is for an experiment"
+        self.event_generate("<MouseWheel>", delta=-120, x=50, y=50)
+
 if __name__ == "__main__":
+
     root = tk.Tk()
     style = ttk.Style()
     style.map("Treeview", background=[('selected', 'orange')])
 
-    tree = DragSelectTreeView(root, columns=("Name", "Age", "Country"))
+    tree = scrollselection(root, columns=("Name", "Age", "Country"))
     tree.configure(selectmode="extended")
 
 
-    for i in range(110):
+    for i in range(1100):
         item = tree.insert("", "end", text=f"orange {i}", values=("John Doe", "30", "USA"))
-        tree.insert(item, "end", text=f"orange {i}", values=("John Doe", "30", "USA"))
 
 
     tree.pack(expand=True,side='left')
-    tree.bind("<ButtonRelease-1>", lambda x: print("selected items are = ", tree.selection()))
 
     scroll = ttk.Scrollbar(root, orient="vertical", command=tree.yview)
     scroll.pack(side='right', fill='y')
