@@ -1,17 +1,15 @@
+## this code is borrowed from ttkwidgets and modified it 
+
 from tkinter import ttk
 import tkinter as tk
 import DragselecterTree
 import os
 from PIL import Image, ImageTk
 
+IM_CHECKED = os.path.join("", "checked.png")
+IM_UNCHECKED = os.path.join("","unchecked.png")
 
-IM_CHECKED = os.path.join("", "checked.png")  # These three checkbox icons were isolated from
-IM_UNCHECKED = os.path.join("",
-                            "unchecked.png")  # Checkbox States.svg (https://commons.wikimedia.org/wiki/File:Checkbox_States.svg?uselang=en)
-
-
-
-class CheckboxTreeview(DragselecterTree.DragSelectTreeView):
+class CheckboxTreeview(DragselecterTree.scrollselection):
     """
     :class:`ttk.Treeview` widget with checkboxes left of each item.
 
@@ -29,12 +27,7 @@ class CheckboxTreeview(DragselecterTree.DragSelectTreeView):
         :param kw: options to be passed on to the :class:`ttk.Treeview` initializer
         """
         super().__init__( master, **kw, style="a.Treeview",columns=("other_column",))
-        # style (make a noticeable disabled style)
-        style = ttk.Style(self)
-        style.configure("Treeview", padding=6)
-        #style.map("Checkbox.Treeview",fieldbackground=[("disabled", '#E6E6E6')],foreground=[("disabled", 'gray40')],background=[("disabled", '#E6E6E6')])
-
-
+        
         # checkboxes are implemented with pictures
         self.im_checked = ImageTk.PhotoImage(Image.open(IM_CHECKED), master=self)
         self.im_unchecked = ImageTk.PhotoImage(Image.open(IM_UNCHECKED), master=self)
@@ -43,12 +36,7 @@ class CheckboxTreeview(DragselecterTree.DragSelectTreeView):
         self.tag_configure("checked", image=self.im_checked)
         # check / uncheck boxes on click
         self.bind("<Button-1>", self._box_click, True)
-        self.heading("other_column", text="Other Column")
-        style.layout("a.Treeview",
-                     [('a.Treeitem.padding', { "children":
-                         [('a.Treeitem.image', { 'side': 'left'}),
-                          ('a.Treeitem.text', { 'side': 'right'})]
-                                            })])
+
     def _expand_collapse_all(self, open):
         """Expand or collapse all items."""
 
@@ -185,7 +173,7 @@ class CheckboxTreeview(DragselecterTree.DragSelectTreeView):
         elif not ("unchecked" in kw["tags"] or "checked" in kw["tags"]) :
             kw["tags"] += (tag,)
 
-        return DragselecterTree.DragSelectTreeView.insert(self, parent, index, iid, **kw)
+        return super().insert( parent, index, iid, **kw)
 
     def get_checked(self):
         """Return the list of checked items that do not have any child."""
@@ -224,20 +212,13 @@ class CheckboxTreeview(DragselecterTree.DragSelectTreeView):
             b = ["checked" in self.item(c, "tags") for c in children]
             if False in b:
                 # at least one box is not checked and item's box is checked
-                self._tristate_parent(parent)
+                pass
+
             else:
                 # all boxes of the children are checked
                 self._check_ancestor(parent)
 
-    def _tristate_parent(self, item):
-        """
-        Put the box of item in tristate and change the state of the boxes of
-        item's ancestors accordingly.
-        """
-        self.change_state(item, "tristate")
-        parent = self.parent(item)
-        if parent:
-            self._tristate_parent(parent)
+
 
     def _uncheck_descendant(self, item):
         """Uncheck the boxes of item's descendant."""
@@ -258,7 +239,7 @@ class CheckboxTreeview(DragselecterTree.DragSelectTreeView):
             b = ["unchecked" in self.item(c, "tags") for c in children]
             if False in b:
                 # at least one box is checked and item's box is unchecked
-                self._tristate_parent(parent)
+                pass
             else:
                 # no box is checked
                 self._uncheck_ancestor(parent)
@@ -270,7 +251,7 @@ class CheckboxTreeview(DragselecterTree.DragSelectTreeView):
         if "image" in elem:
             # a box was clicked
             item = self.identify_row(y)
-            if self.tag_has("unchecked", item) or self.tag_has("tristate", item):
+            if self.tag_has("unchecked", item) :
                 self._check_ancestor(item)
                 self._check_descendant(item)
             else:
@@ -280,19 +261,29 @@ class CheckboxTreeview(DragselecterTree.DragSelectTreeView):
 class dragselectcheckbox (CheckboxTreeview):
     "when draging and selecting multipleit will add tickmarks to checkbox automaticaly"
     def show_multiple_selection (self):
+        "parent class has autoselect option when draging so reusing it here"
         super().show_multiple_selection ()
         for item in self.selection ():
             self.change_state (item, "checked")
 
+    def unckeck_all_but_not_selection(self):
+        for item in self.get_checked():
+            if item not in self.selection():
+               self.change_state(item,"unchecked")
+
+    def uncheck_all_plus_selection(self):
+        self.unselect_allitems()
+        self.unckeck_all_but_not_selection()
+
 if __name__ == "__main__":
    root = tk.Tk()
 
-   tree = dragselectcheckbox(root)
+   tree = dragselectcheckbox(root,padding=33)
    tree.pack()
 
    for x in range(100000):
        tree.insert("", "end", text="heloo "+str(x))
 
-   tree.bind("<ButtonRelease-2>",lambda x:tree.uncheck_all())
+   tree.bind("<ButtonRelease-2>",lambda x:tree.unckeck_all_but_not_selection())
 
    root.mainloop()
