@@ -1,12 +1,12 @@
 
   DragselecterTree
 
-    this is an cusomized treeview widget of ttk module used in python.
-    now it alows muliple selection by clicking and draging `` 
-</p>
+    this is an cusomized treeview widget of ttk python module .
+    added feature  allows muliple selection by clicking and draging `` 
+
 
  CheckboxTreeview.py
 
-    it is borrowed from ttkwidgets and modified it added a subclass that 
-    provides auto selecting chekbox when multiples items selected by draging
+    it is borrowed from ttkwidgets and modified it
+    it allows drag selection of chekboxes
     
