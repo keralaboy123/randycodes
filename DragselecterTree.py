@@ -92,15 +92,11 @@ if __name__ == "__main__":
 
     tree = scrollselection(root, columns=("Name", "Age", "Country"))
     tree.configure(selectmode="extended")
-
-
     for i in range(1100):
         item = tree.insert("", "end", text=f"orange {i}", values=("John Doe", "30", "USA"))
-
-
     tree.pack(expand=True,side='left')
-
     scroll = ttk.Scrollbar(root, orient="vertical", command=tree.yview)
     scroll.pack(side='right', fill='y')
+    
     tree.configure(yscrollcommand=scroll.set)
     root.mainloop()
