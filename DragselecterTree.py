@@ -15,9 +15,7 @@ class DragSelectTreeView(ttk.Treeview):
 
     def __init__(self, root, **kw):
         super().__init__(root, **kw)
-        self.items = []
         self.keyholdding = False
-
         super().bind("<Button-1>", self.start_selection)
         super().bind("<B1-Motion>", self.update_selection)
         super().bind("<ButtonRelease-1>", self.end_selection)
@@ -55,22 +53,17 @@ class DragSelectTreeView(ttk.Treeview):
         self.selection_set([])
 
     def start_selection(self, event):
-        self.selection_set([])
         self.keyholdding = True
         item = self.identify('item', event.x, event.y)
-        self.selection_add(item)
+        self.selection_set(item)
         self._press(event)
 
     def update_selection(self, event):
-
         if self.keyholdding:
-
             item = self.identify('item', event.x, event.y)
             if not item in self.selection():
                 self.selection_add(item)
-
         self._motion(event)
-
 
     def end_selection(self, event):
         self.keyholdding = False
@@ -86,11 +79,9 @@ class scrollselection(DragSelectTreeView):
         super().__init__(root,**kw)
         self.bind("<B1-Motion>",self.generate_scrollingevent)
         super().unbind("<MouseWheel>")
-        
     def generate_scrollingevent(self,event):
         "this is for an experiment"
         self.event_generate("<MouseWheel>", delta=-120, x=50, y=50)
-
 
 if __name__ == "__main__":
 
