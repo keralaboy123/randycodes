@@ -15,7 +15,9 @@ class DragSelectTreeView(ttk.Treeview):
 
     def __init__(self, root, **kw):
         super().__init__(root, **kw)
+
         self.keyholdding = False
+        self.firstkey = None
         super().bind("<Button-1>", self.start_selection)
         super().bind("<B1-Motion>", self.update_selection)
         super().bind("<ButtonRelease-1>", self.end_selection)
@@ -31,20 +33,8 @@ class DragSelectTreeView(ttk.Treeview):
         pass
 
     def _motion(self, event):
-
         pass
 
-    def bind(self, event_string, function,val=None, **kw):
-        if event_string == "<Button-1>":
-            self._press = function
-        elif event_string == "<B1-Motion>":
-            self._motion = function
-        elif event_string == "<ButtonRelease-1>":
-            self._release = function
-        elif event_string == "<MouseWheel>":
-            self._scroll = function
-        else:
-            super().bind(event_string, function)
 
     def getselection_list(self):
         return self.selection()
@@ -54,35 +44,77 @@ class DragSelectTreeView(ttk.Treeview):
 
     def start_selection(self, event):
         self.keyholdding = True
-        item = self.identify('item', event.x, event.y)
-        self.selection_set(item)
-        self._press(event)
+        self.firstkey  = self.identify('item', event.x, event.y)
+        self.selection_set(self.firstkey)
 
-    def update_selection(self, event):
+
+    def update_selection(self,event):
         if self.keyholdding:
-            item = self.identify('item', event.x, event.y)
-            if not item in self.selection():
-                self.selection_add(item)
-        self._motion(event)
 
+            item = self.identify('item', event.x, event.y)
+
+            if item and not item in self.selection() and self.firstkey:
+
+                first_item = self.firstkey
+                first_item_index = self.get_children("").index(first_item)
+                last_item = self.get_children("").index(item)
+                maxmum = max(first_item_index,last_item)
+                minmum = min(first_item_index, last_item)
+                self.selection_set(self.get_children("")[minmum:maxmum+1])
     def end_selection(self, event):
         self.keyholdding = False
-        self._release(event)
+
 
 
 
 class scrollselection(DragSelectTreeView):
-    """automatic scrolling of treeview when selected and dragged
-     treeview items will scroll and a selection will appear over the items
+    """
+    automatic scrolling when dragged. and
+    when button release then all selected item will get tickmark in checkbox
     """
     def __init__(self,root,**kw):
+        self.lasty = None
         super().__init__(root,**kw)
-        self.bind("<B1-Motion>",self.generate_scrollingevent)
-        super().unbind("<MouseWheel>")
-        
+        self.bind("<B1-Motion>", self.dragged)
+
+    def dragged(self, event):
+        if self.keyholdding:
+           self.update_selection(event)
+           self.generate_scrollingevent(event)
+
+    def get_item_location(treeview, item):
+        # Get the bounding box coordinates of the specified item
+        x,y = 0,0
+        bbox = treeview.bbox(item)
+        if bbox:
+            x, y = bbox[0], bbox[1]
+
+        return x, y
+    
     def generate_scrollingevent(self,event):
-        "this is for an experiment"
-        self.event_generate("<MouseWheel>", delta=-120, x=50, y=50)
+        if self.lasty:
+            items = self.__getvisible_items()
+            firstitem ,lastitem = items[0], items[-1]
+            firstitem_x, firstitem_y = self.get_item_location(firstitem)
+            lastitem_x,lastitem_y = self.get_item_location(lastitem)
+            if  firstitem_y == 0 and lastitem_y == 0:
+               print("first item and lastiem both not found so autoscroll never work")
+            else:
+               if self.lasty < event.y and event.y >= lastitem_y :
+                   self.yview_scroll(1, "units")
+               elif self.lasty > event.y  and event.y <= firstitem_y:
+                   self.yview_scroll(-1, "units")
+        self.lasty = event.y
+    def __getvisible_items(treeview):
+
+        total_items = treeview.get_children("")
+        y_scroll = treeview.yview()
+        first_item_index = int(y_scroll[0] * len(total_items))
+        last_item_index = int(y_scroll[1] * len(total_items))
+        visible_items = total_items[first_item_index:last_item_index + 1]
+        return visible_items
+
+
 
 if __name__ == "__main__":
 
@@ -92,11 +124,14 @@ if __name__ == "__main__":
 
     tree = scrollselection(root, columns=("Name", "Age", "Country"))
     tree.configure(selectmode="extended")
-    for i in range(1100):
-        item = tree.insert("", "end", text=f"orange {i}", values=("John Doe", "30", "USA"))
+
+
+    for i in range(110):
+        item = tree.insert("", "end", text=f"element number =  {i}", values=("John Doe", "30", "USA"))
+
+
     tree.pack(expand=True,side='left')
     scroll = ttk.Scrollbar(root, orient="vertical", command=tree.yview)
     scroll.pack(side='right', fill='y')
-    
     tree.configure(yscrollcommand=scroll.set)
     root.mainloop()
