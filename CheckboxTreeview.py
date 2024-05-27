@@ -1,5 +1,3 @@
-## this code is borrowed from ttkwidgets and modified it 
-
 from tkinter import ttk
 import tkinter as tk
 import DragselecterTree
@@ -13,15 +11,12 @@ class CheckboxTreeview(DragselecterTree.scrollselection):
 
     def __init__(self, master=None, **kw):
 
-        super().__init__( master, **kw, style="a.Treeview",columns=("other_column",))
-
-
+        super().__init__( master, **kw, style="a.Treeview")
         self.im_checked = ImageTk.PhotoImage(Image.open(IM_CHECKED), master=self)
         self.im_unchecked = ImageTk.PhotoImage(Image.open(IM_UNCHECKED), master=self)
-
         self.tag_configure("unchecked", image=self.im_unchecked)
         self.tag_configure("checked", image=self.im_checked)
-        # check / uncheck boxes on click
+
         self.bind("<Button-1>", self._box_click, True)
 
     def _expand_collapse_all(self, open):
@@ -205,8 +200,6 @@ class CheckboxTreeview(DragselecterTree.scrollselection):
                 # all boxes of the children are checked
                 self._check_ancestor(parent)
 
-
-
     def _uncheck_descendant(self, item):
         """Uncheck the boxes of item's descendant."""
         children = self.get_children(item)
@@ -247,11 +240,10 @@ class CheckboxTreeview(DragselecterTree.scrollselection):
 
 class dragselectcheckbox (CheckboxTreeview):
     "when draging and selecting multiple items then it will add tickmarks to checkbox automaticaly"
+    
     def update_selection (self,event):
         "parent class has autoselect option when draging so reusing it here"
         super().update_selection (event)
-        for item in self.selection ():
-            self.change_state (item, "checked")
 
     def unckeck_all_but_not_selection(self):
         for item in self.get_checked():
@@ -262,15 +254,32 @@ class dragselectcheckbox (CheckboxTreeview):
         self.unselect_allitems()
         self.unckeck_all_but_not_selection()
 
+    def end_selection (self,event):
+        "parent class has autoselect option when draging so reusing it here"
+        super().end_selection (event)
+        all = self.selection()
+        if len(all)>1:
+            for item in all:
+                if self.tag_has("unchecked",item):
+                   self.change_state (item, "checked")
+                else:
+                   self.change_state(item, "unchecked")
+
+
 if __name__ == "__main__":
-   root = tk.Tk()
+    root = tk.Tk()
+    style = ttk.Style()
+    style.map("Treeview", background=[('selected', 'orange')])
 
-   tree = dragselectcheckbox(root,padding=33)
-   tree.pack()
+    tree = dragselectcheckbox(root, columns=("Name", "Age", "Country"))
+    tree.configure(selectmode="extended")
 
-   for x in range(100000):
-       tree.insert("", "end", text="heloo "+str(x))
+    for i in range(30000):
+        item = tree.insert("", "end", text=f"element number =  {i}", values=("John Doe", "30", "USA"))
 
-   tree.bind("<ButtonRelease-2>",lambda x:tree.uncheck_all_plus_selection())
-
-   root.mainloop()
+    tree.pack(expand=True, side='left')
+    root.tk.call('tk', 'scaling', 1.5)
+    scroll = ttk.Scrollbar(root, orient="vertical", command=tree.yview)
+    scroll.pack(side='right', fill='y')
+    tree.configure(yscrollcommand=scroll.set)
+    root.mainloop()
