@@ -105,8 +105,8 @@ class scrollselection(DragSelectTreeView):
                elif self.lasty > event.y  and event.y <= firstitem_y:
                    self.yview_scroll(-1, "units")
         self.lasty = event.y
+        
     def __getvisible_items(treeview):
-
         total_items = treeview.get_children("")
         y_scroll = treeview.yview()
         first_item_index = int(y_scroll[0] * len(total_items))
