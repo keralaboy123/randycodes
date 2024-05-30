@@ -22,20 +22,7 @@ class DragSelectTreeView(ttk.Treeview):
         super().bind("<B1-Motion>", self.update_selection)
         super().bind("<ButtonRelease-1>", self.end_selection)
         super().bind("<MouseWheel>", self.update_selection)
-
-    def _scroll(self,event):
-        pass
-
-    def _press(self, event):
-        pass
-
-    def _release(self, event):
-        pass
-
-    def _motion(self, event):
-        pass
-
-
+        
     def getselection_list(self):
         return self.selection()
 
@@ -61,6 +48,7 @@ class DragSelectTreeView(ttk.Treeview):
                 maxmum = max(first_item_index,last_item)
                 minmum = min(first_item_index, last_item)
                 self.selection_set(self.get_children("")[minmum:maxmum+1])
+                
     def end_selection(self, event):
         self.keyholdding = False
 
@@ -105,6 +93,7 @@ class scrollselection(DragSelectTreeView):
                elif self.lasty > event.y  and event.y <= firstitem_y:
                    self.yview_scroll(-1, "units")
         self.lasty = event.y
+        
     def __getvisible_items(treeview):
 
         total_items = treeview.get_children("")
