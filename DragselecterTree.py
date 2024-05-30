@@ -105,8 +105,8 @@ class scrollselection(DragSelectTreeView):
                elif self.lasty > event.y  and event.y <= firstitem_y:
                    self.yview_scroll(-1, "units")
         self.lasty = event.y
-        
     def __getvisible_items(treeview):
+
         total_items = treeview.get_children("")
         y_scroll = treeview.yview()
         first_item_index = int(y_scroll[0] * len(total_items))
@@ -114,7 +114,15 @@ class scrollselection(DragSelectTreeView):
         visible_items = total_items[first_item_index:last_item_index + 1]
         return visible_items
 
-
+class sorter(scrollselection):
+    "this class provides sort function for treeview widget"
+    def sort(self,col="",reverse=True):
+        data = [(int(self.set(k, col)), k) for k in self.get_children('')]
+        data.sort(reverse=reverse)
+        self.delete(*self.get_children(""))
+        for index, (val, k) in enumerate(data):
+            self.insert("", "end", text=f"element number =  {index}", values=(f"{val}", f"{k}", "USA"))
+        self.heading(col, command=lambda: self.sort(col=col, reverse=not reverse))
 
 if __name__ == "__main__":
 
@@ -122,14 +130,13 @@ if __name__ == "__main__":
     style = ttk.Style()
     style.map("Treeview", background=[('selected', 'orange')])
 
-    tree = scrollselection(root, columns=("Name", "Age", "Country"))
+    tree = sorter(root, columns=("Height", "Age", "Country"))
     tree.configure(selectmode="extended")
 
+    for i in range(80000):
+        item = tree.insert("", "end", text=f"element number =  {i}", values=(f"{i}", "30", "USA"))
 
-    for i in range(110):
-        item = tree.insert("", "end", text=f"element number =  {i}", values=("John Doe", "30", "USA"))
-
-
+    tree.heading("Height", text="Height", command=lambda: tree.sort( "Height",reverse=True))
     tree.pack(expand=True,side='left')
     scroll = ttk.Scrollbar(root, orient="vertical", command=tree.yview)
     scroll.pack(side='right', fill='y')
