@@ -35,6 +35,7 @@ class googlescrapper(scrapper):
     def __init__(self,url=""):
         url = url or self.__class__.url
         super().__init__(url)
+        
     def parse_url(self, htmldata):
         soup = BeautifulSoup(htmldata, 'html.parser')
         search_results = []
@@ -64,6 +65,7 @@ class googlescrapper(scrapper):
 
 
 class linkscrapper(googlescrapper):
+    
     def get_target_site_data(self,link):
         one_website = scrapper(link)
         html = one_website.readhtml()
@@ -85,14 +87,13 @@ def ask_by_cli(query = "",save="",show_incli=""):
     for index, result in enumerate(results):
         if  show_incli:
             print(f"{index + 1}. {result['title']}\n{result['link']}\n")
-
     query = save or input("type anything if you want to save it to file else press enter > ")
     if query:
         gscrapper.scrap_all(results)
 
+
 if __name__ == "__main__":
     import argparse
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-a", "--auto", help="automaticaly scraps provided search query and shows results in cli")
     parser.add_argument("-sh", "--show", help="show in cli the scrapped urls and titles.type any charecter to turn it on")
