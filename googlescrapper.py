@@ -1,8 +1,6 @@
 
 # author : abilash 9/6/2024  swiftsafe internship assignment
 
-import requests
-
 import urllib.parse
 from datetime import datetime
 import json
@@ -11,8 +9,16 @@ import os
 
 try:
     from bs4 import BeautifulSoup
-except:
-    print ("required module 'BeautifulSoup4' not installed try 'pip install BeautifulSoup4 ' ")
+except ModuleNotFoundError:
+    print ("* required module 'BeautifulSoup4' not installed try 'pip install BeautifulSoup4 ' ")
+    exit()
+
+try:
+    import request
+except ModuleNotFoundError:
+    print ("* required module 'requests' not installed try 'pip install requests ' ")
+    exit()
+
 
 USERAGENT = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0'}
 
@@ -63,7 +69,7 @@ class googlescrapper(scrapper):
     def readhtml(self,query,start="0"):
         query = urllib.parse.quote_plus(query)
         fullurl = self.url + query +"&start="+start
-        print("link for goole is  = ",fullurl)
+        print("link for goole search is  = ",fullurl)
         response = super().readhtml(fullurl)
         return response
 
