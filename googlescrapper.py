@@ -145,6 +145,6 @@ if __name__ == "__main__":
         scrap_maximum(args.query, max_results = args.max, output_folder=args.path)
     else:
         print("hello. to know how to use this script type following 'python this_scriptname.py --help'")
-        print("  example command = 'python gscraper.py -q india -mx 21 --path 'F:\tmp' \n")
+        print("  example usage = 'python gscraper.py -q india -mx 21 --path 'F:\tmp' \n")
         ask_by_cli()
 
