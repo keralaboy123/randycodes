@@ -92,9 +92,9 @@ def ask_by_cli(query = "",save="",show_incli="",start="0",output_file=""):
         if not  show_incli:
             print(f"{index + 1}. {result['title']}\n{result['link']}\n")
 
-    query = save or input("type anything if you want to save it to file else press enter > ")
+    query = save or input("to save results type a folder path else press enter > ")
     if query:
-        gscrapper.scrap_all(results,output_file)
+        gscrapper.scrap_all(results,query)
 
 class autoscrapper(threading.Thread):
     "this is runni9ng in thread for fast processing of scrapping"
@@ -116,6 +116,7 @@ def scrap_maximum(query, max_results = 7,output_file=""):
 
 
 if __name__ == "__main__":
+    print("hello to know how to use this script type following 'python this_scriptname.py --help'")
     import argparse
     parser = argparse.ArgumentParser(description="this will search google for query and reads   targets websites url and saves html data in json format ")
     parser.add_argument("-mx", "--max", help = "total search result to scrap")
