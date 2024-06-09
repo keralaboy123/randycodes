@@ -14,7 +14,7 @@ except ModuleNotFoundError:
     exit()
 
 try:
-    import request
+    import requests
 except ModuleNotFoundError:
     print ("* required module 'requests' not installed try 'pip install requests ' ")
     exit()
@@ -68,7 +68,7 @@ class googlescrapper(scrapper):
 
     def readhtml(self,query,start="0"):
         query = urllib.parse.quote_plus(query)
-        fullurl = self.url + query +"&start="+start
+        fullurl = self.url + query +"&start="+start+"&num="+"25"
         print("link for goole search is  = ",fullurl)
         response = super().readhtml(fullurl)
         return response
@@ -120,11 +120,16 @@ class autoscrapper(threading.Thread):
         ask_by_cli(self.query, save=True, show_incli=True, start = str(self.start_index), output_folder = self.output_folder)
 
 
-def scrap_maximum(query, max_results = 7, output_folder=""):
+def scrap_maximum(query, max_results = 25, output_folder=""):
         "this is used for running in thread"
-        for start in range(6,int(max_results),6):
-            scrapper= autoscrapper(query, start, output_folder)
-            scrapper.start()
+        max_results = int(max_results)
+        total_result_in_one_page = 20
+        if max_results <= total_result_in_one_page:
+            print("maximum results must be >",total_result_in_one_page)
+        else:
+            for startindex in range(0,max_results,total_result_in_one_page):
+                scrapper= autoscrapper(query, startindex, output_folder)
+                scrapper.start()
 
 
 if __name__ == "__main__":
