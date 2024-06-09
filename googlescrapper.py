@@ -1,11 +1,13 @@
 
-# author :keralaboy123 9/6/2024  swiftsafe internship assignment
+# author : abilash 9/6/2024  swiftsafe internship assignment
 
 import requests
 from bs4 import BeautifulSoup
 import urllib.parse
-import time
+from datetime import datetime
 import json
+import threading
+import os
 
 USERAGENT = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0'}
 
@@ -23,8 +25,10 @@ class scrapper:
         else:
             return ""
 
-    def save(self,dict_data,filename=""):
-        filename = filename or time.strftime("%Y%m%d-%H%M%S")+".txt"
+    def save(self,dict_data,folder=""):
+
+        filename =  datetime.now().strftime("%Y%m%d-%H%M%S%f")+".txt"
+        filename = os.path.join(folder , filename)
         with open(filename,"w+") as file:
             json.dump(dict_data, file, indent = 6)
 
@@ -35,7 +39,6 @@ class googlescrapper(scrapper):
     def __init__(self,url=""):
         url = url or self.__class__.url
         super().__init__(url)
-        
     def parse_url(self, htmldata):
         soup = BeautifulSoup(htmldata, 'html.parser')
         search_results = []
@@ -55,53 +58,72 @@ class googlescrapper(scrapper):
     def readhtml(self,query,start="0"):
         query = urllib.parse.quote_plus(query)
         fullurl = self.url + query +"&start="+start
+        print("link for goole is  = ",fullurl)
         response = super().readhtml(fullurl)
         return response
 
-    def get_links(self, search):
-        data = self.readhtml(search)
+    def get_links(self, search,start="0"):
+        data = self.readhtml(search,start)
         results = self.parse_url(data)
         return results
 
 
 class linkscrapper(googlescrapper):
-    
+
     def get_target_site_data(self,link):
         one_website = scrapper(link)
         html = one_website.readhtml()
         return html
 
-    def scrap_all(self,urldict):
+    def scrap_all(self,urldict,output_file=""):
         for one in urldict:
             link = one["link"]
             html_of_target_link = self.get_target_site_data(link)
             dict_data = {"data" : html_of_target_link}
             dict_data.update(one)
-            self.save(dict_data)
+            self.save(dict_data,folder = output_file)
 
 
-def ask_by_cli(query = "",save="",show_incli=""):
+def ask_by_cli(query = "",save="",show_incli="",start="0",output_file=""):
     gscrapper = linkscrapper()
     query = query or  input(" enter a search term > ")
-    results = gscrapper.get_links(query)
+    results = gscrapper.get_links(query,start)
     for index, result in enumerate(results):
-        if  show_incli:
+        if not  show_incli:
             print(f"{index + 1}. {result['title']}\n{result['link']}\n")
+
     query = save or input("type anything if you want to save it to file else press enter > ")
     if query:
-        gscrapper.scrap_all(results)
+        gscrapper.scrap_all(results,output_file)
+
+class autoscrapper(threading.Thread):
+    "this is runni9ng in thread for fast processing of scrapping"
+    def __init__(self,query,start,output_file=""):
+        super().__init__()
+        self.query = query
+        self.start_index = start
+        self.output_file= output_file
+
+    def run(self) -> None:
+        ask_by_cli(self.query, save=True, show_incli=True, start =str(self.start_index),output_file=self.output_file)
+
+
+def scrap_maximum(query, max_results = 7,output_file=""):
+        "this is used for running in thread"
+        for start in range(6,int(max_results),6):
+            scrapper= autoscrapper(query,start,output_file)
+            scrapper.start()
 
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--auto", help="automaticaly scraps provided search query and shows results in cli")
-    parser.add_argument("-sh", "--show", help="show in cli the scrapped urls and titles.type any charecter to turn it on")
-    parser.add_argument("-s", "--save", help="automaticaly save's urls scrapped. type any charecter to turn it on ")
+    parser = argparse.ArgumentParser(description="this will search google for query and reads   targets websites url and saves html data in json format ")
+    parser.add_argument("-mx", "--max", help = "total search result to scrap")
+    parser.add_argument("-q", "--query", help = "automaticaly scraps provided search query without asking")
+    parser.add_argument("-p", "--path", help = "path to folder  where files should be saved. ")
     args = parser.parse_args()
-    if args.auto :
-        ask_by_cli(args.auto,args.save,args.show)
+    if args.query  and args.max and args.path:
+        scrap_maximum(args.query,max_results = args.max,output_file=args.path )
     else:
         ask_by_cli()
-
 
