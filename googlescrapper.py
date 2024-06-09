@@ -124,7 +124,7 @@ def scrap_maximum(query, max_results = 25, output_folder=""):
         "this is used for running in thread"
         max_results = int(max_results)
         total_result_in_one_page = 20
-        if max_results <= total_result_in_one_page:
+        if max_results < total_result_in_one_page:
             print("maximum results must be >",total_result_in_one_page)
         else:
             for startindex in range(0,max_results,total_result_in_one_page):
@@ -133,7 +133,8 @@ def scrap_maximum(query, max_results = 25, output_folder=""):
 
 
 if __name__ == "__main__":
-    print("hello to know how to use this script type following 'python this_scriptname.py --help'")
+    print("hello. to know how to use this script type following 'python this_scriptname.py --help'")
+    print("   example command = 'python gscraper.py -q india -mx 21 --path 'F:\tmp' \n")
     import argparse
     parser = argparse.ArgumentParser(description="this will search google for query and reads   targets websites url and saves html data in json format ")
     parser.add_argument("-mx", "--max", help = "total search result to scrap")
