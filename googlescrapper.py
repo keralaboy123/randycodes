@@ -126,8 +126,9 @@ def scrap_maximum(query, max_results = 25, output_folder=""):
         total_result_in_one_page = 20
         if max_results < total_result_in_one_page:
             print("maximum results must be >",total_result_in_one_page)
-        else:
-            for startindex in range(0,max_results,total_result_in_one_page):
+            max_results = total_result_in_one_page
+
+        for startindex in range(0,max_results,total_result_in_one_page):
                 scrapper= autoscrapper(query, startindex, output_folder)
                 scrapper.start()
 
