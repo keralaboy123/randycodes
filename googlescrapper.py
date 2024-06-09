@@ -2,13 +2,17 @@
 # author : abilash 9/6/2024  swiftsafe internship assignment
 
 import requests
-from bs4 import BeautifulSoup
+
 import urllib.parse
 from datetime import datetime
 import json
 import threading
 import os
-    
+
+try:
+    from bs4 import BeautifulSoup
+except:
+    print ("required module 'BeautifulSoup4' not installed try 'pip install BeautifulSoup4 ' ")
 
 USERAGENT = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:101.0) Gecko/20100101 Firefox/101.0'}
 
