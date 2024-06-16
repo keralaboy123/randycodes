@@ -135,7 +135,7 @@ def scrap_maximum(query, max_results = 25, output_folder=""):
 
 if __name__ == "__main__":
 
-    import argparse
+    import argparse,sys
     parser = argparse.ArgumentParser(description="this will search google for query and reads   targets websites url and saves html data in json format ")
     parser.add_argument("-mx", "--max", help = "total search result to scrap")
     parser.add_argument("-q", "--query", help = "automaticaly scraps provided search query without asking")
@@ -144,7 +144,8 @@ if __name__ == "__main__":
     if args.query  and args.max and args.path:
         scrap_maximum(args.query, max_results = args.max, output_folder=args.path)
     else:
-        print("hello. to know how to use this script type following 'python this_scriptname.py --help'")
+        this_scriptname = os.path.basename(sys.argv[0])
+        print(f"hello. to know how to use this script type following 'python {this_scriptname} --help'")
         print("  example usage = 'python gscraper.py -q \"india\" -mx 21 --path 'c:\\\\tmp' \n")
         ask_by_cli()
 
